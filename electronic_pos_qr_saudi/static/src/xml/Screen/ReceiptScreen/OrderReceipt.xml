@@ -793,4 +793,35 @@
             </t>
         </xpath>
     </t>
+
+<t t-raw="1">
+    <!-- Include the html2canvas script from a CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.4.1/html2canvas.min.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof html2canvas !== 'undefined') {
+                var receiptElement = document.querySelector('.sh_pos_receipt');
+                
+                if (receiptElement) {
+                    html2canvas(receiptElement).then(function(canvas) {
+                        var img = new Image();
+                        img.src = canvas.toDataURL();
+
+                        if (window.Android && typeof Android.printReceipts === 'function') {
+                            Android.printReceipts(img.src);  // Send the base64 string to Android for printing
+                        } else {
+                            alert("Android.printReceipts is not available.");
+                        }
+                    }).catch(function(error) {
+                        console.error('Error in html2canvas:', error);
+                    });
+                }
+            } else {
+                console.error('html2canvas is not loaded.');
+            }
+        });
+    </script>
+</t>
+
 </templates>
