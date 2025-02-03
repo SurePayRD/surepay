@@ -1,19 +1,20 @@
 /* global timapi */
-function send_Amount(Amount) 
-{
+function send_Amount(Amount) {
     try {
         var response = Android.startPayment(Amount.toString());
+        
+        console.log("Response from Android: " + response);
 
-        if (response.includes("|")) 
-        {
+        if (response.includes("|")) {
             var responseArray = response.split("|");
+
+            console.log("Response Array: ", responseArray);
 
             alert("Response Array: " + responseArray.join(", "));
             
             var status = responseArray[0];
             
-            switch (status) 
-            {
+            switch (status) {
                 case "0":  // success
                     console.log("Approved");
                     return new Promise((resolve) => {    
@@ -28,11 +29,11 @@ function send_Amount(Amount)
                 default:
                     console.warn("Invalid payment status:", status);
             }
-        } else 
-        {
-            console.warn("Error response format:", response);
-            alert("Error response: " + response); 
-            return Promise.resolve(); 
+        } else {
+            console.warn("Unexpected response format:", response);
+            alert("Unexpected response: " + response); // Show the response in an alert
+
+            return Promise.resolve(); // Return immediately after error handling
         }
     } catch (error) {
         console.error(error);
@@ -145,31 +146,6 @@ var PaymentSix = PaymentInterface.extend({
         return this._sendTransaction(timapi.constants.TransactionType.reversal);
     },
     
-
-    send_payment_request: function () {
-    var Amount = this.pos.get_order().selected_paymentline.amount * 100;  // Convert to cents
-    this._super.apply(this, arguments);
-    this.pos.get_order().selected_paymentline.set_payment_status('waitingCard');
-
-    // Define the success, error, and connection failure callback functions
-    var successCallback = (response) => {
-        console.log("Payment successful:", response);
-        this.transactionResolve(true); // Resolve the promise with success
-    };
-
-    var errorCallback = (errorCode) => {
-        console.error("Payment failed with error:", errorCode);
-        this.transactionResolve(false); // Resolve the promise with failure
-    };
-
-    var onConnectFailed = (message) => {
-        console.error("Connection failed:", message);
-        this.transactionResolve(false); // Resolve the promise with failure
-    };
-
-    // Call the sendAmount function with the necessary arguments
-    return sendAmount(Amount.toFixed(2), successCallback, errorCallback, onConnectFailed);
-    }
 
     send_balance: function () {
         this.terminal.balanceAsync();
